@@ -1,6 +1,9 @@
-from django.db import models
-
 import uuid
+
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
+
+from django.db import models
 
 
 class Wine(models.Model):
@@ -15,6 +18,12 @@ class Wine(models.Model):
     )
     variety = models.CharField(max_length=255)
     winery = models.CharField(max_length=255)
+    search_vector = SearchVectorField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            GinIndex(fields=['search_vector'], name='search_index')
+        ]
 
     def __str__(self):
         return f'{self.id}'
