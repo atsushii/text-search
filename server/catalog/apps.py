@@ -5,5 +5,4 @@ class CatalogConfig(AppConfig):
     name = 'catalog'
 
     def ready(self):
-        print('call')
         from . import signals
