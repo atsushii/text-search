@@ -1,7 +1,9 @@
 import uuid
 
 from django.contrib.postgres.indexes import GinIndex
-from django.contrib.postgres.search import SearchVectorField, SearchQuery, SearchRank
+from django.contrib.postgres.search import (
+    SearchVectorField, SearchQuery, SearchRank, TrigramSimilarity
+)
 
 from django.db import models
 from django.db.models import F, Q
@@ -51,8 +53,19 @@ class SearchHeadLine(models.Func):
     template = '%(function)s(%(expressions)s, \'StartSel = <mark>, StopSel = </mark>, HighlightAll=TRUE\')'
 
 
+class WineSearchWordQuerySet(models.query.QuerySet):
+    def search(self, query):
+        return self.annotate(
+            similarity=TrigramSimilarity('word', query)
+        ).filter(similarity__gte=0.3).order_by('-similarity')
+
+
 class WineSearchWord(models.Model):
     word = models.CharField(max_length=255, unique=True)
 
+    objects = WineSearchWordQuerySet.as_manager()
+
     def __str__(self):
         return self.word
+
+

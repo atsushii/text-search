@@ -102,3 +102,14 @@ class ViewTests(APITestCase):
             'shaw',
             'wine'
         ], list(wine_search_words))
+
+    def test_suggests_words_for_spelling_mistakes(self):
+        WineSearchWord.objects.bulk_create([
+            WineSearchWord(word='pinot'),
+            WineSearchWord(word='grigio'),
+            WineSearchWord(word='noir'),
+            WineSearchWord(word='merlot'),
+        ])
+        response = self.client.get('/api/v1/catalog/wine-search-words/?query=greegio')
+        self.assertEqual(1, len(response.data))
+        self.assertEqual('grigio', response.data[0]['word'])
