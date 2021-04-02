@@ -7,6 +7,7 @@ services:
     container_name: perusable-server
     depends_on:
       - db
+      - elasticsearh
     environment:
       - SQL_ENGINE=django.db.backends.postgresql
       - SQL_DATABASE=perusable
@@ -14,6 +15,7 @@ services:
       - SQL_PASSWORD=perusable
       - SQL_HOST=perusable-database
       - SQL_PORT=5432
+      - ES_HOSTS=http://perusable-elasticsearch:920
     command: ["bash", "start.sh"]
     ports:
       - 8003:8000
@@ -32,6 +34,18 @@ services:
     volumes:
       - perusable-database:/var/lib/postgresql/data
 
+  elasticsearh:
+    container_name: perusable-elasticsearch
+    environment:
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+    image: elasticsearch:7.10.1
+    ports:
+    - 9200:9200
+    volumes:
+      - perusable-elasticsearch:/usr/share/elasticsearch/data
+
   client:
     build:
       context: ./client
@@ -46,3 +60,4 @@ services:
 
 volumes:
   perusable-database:
+  perusable-elasticsearch:
