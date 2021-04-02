@@ -15,7 +15,7 @@ services:
       - SQL_PASSWORD=perusable
       - SQL_HOST=perusable-database
       - SQL_PORT=5432
-      - ES_HOSTS=http://perusable-elasticsearch:920
+      - ES_HOSTS=http://perusable-elasticsearch:9200
     command: ["bash", "start.sh"]
     ports:
       - 8003:8000
