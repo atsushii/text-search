@@ -81,3 +81,19 @@ class ESWinesView(APIView):
             } for hit in response])
         else:
             return Response(data=[])
+
+
+class ESWineSearchWordsView(APIView):
+    def get(self, request, *args, **kwargs):
+        query = self.request.query_params.get('query')
+
+        search = Search().suggest('result', query, term={
+            'field': 'all_text'
+        })
+
+        response = search.execute()
+
+        options = response.suggest.result[0]['options']
+        words = [{'word': option['text']} for option in options]
+
+        return Response(data=words)

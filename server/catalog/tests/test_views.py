@@ -118,7 +118,7 @@ class ViewTests(APITestCase):
             WineSearchWord(word='noir'),
             WineSearchWord(word='merlot'),
         ])
-        response = self.client.get('/api/v1/catalog/wine-search-words/?query=greegio')
+        response = self.client.get('/api/v1/catalog/pg-wine-search-words/?query=greegio')
         self.assertEqual(1, len(response.data))
         self.assertEqual('grigio', response.data[0]['word'])
 
@@ -172,3 +172,8 @@ class ESViewTests(APITestCase):
     def test_description_highlighting_matched_words(self):
         response = self.client.get('/api/v1/catalog/es-wines/?query=wine')
         self.assertEquals('A delicious bottle of <mark>wine</mark>.', response.data[0]['description'])
+
+    def test_suggests_for_spelling_mistake(self):
+        response = self.client.get('/api/v1/catalog/es-wine-search-words/?query=greegio')
+        self.assertEqual(2, len(response.data))
+        self.assertEqual('grigio', response.data[0]['word'])
