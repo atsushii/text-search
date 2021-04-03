@@ -149,12 +149,22 @@ class ESViewTests(APITestCase):
                     'winery': fields['winery'],
                 }, refresh=True)
 
+        self.mock_constants = patch('catalog.views.constants').start()
+        self.mock_constants.ES_INDEX = self.index
+
+    def tearDown(self):
+        self.mock_constants.stop()
+        self.connection.indices.delete(index=self.index)
+
     def test_query_matches_variety(self):
-        with patch('catalog.views.constants') as mock_constants:
-            mock_constants.ES_INDEX = self.index
-            response = self.client.get('/api/v1/catalog/es-wines/?query=Cabernet')
+        response = self.client.get('/api/v1/catalog/es-wines/?query=Cabernet')
         self.assertEquals(1, len(response.data))
         self.assertEquals("58ba903f-85ff-45c2-9bac-6d0732544841", response.data[0]['id'])
 
-    def tearDown(self):
-        self.connection.indices.delete(index=self.index)
+    def test_search_results_returned_in_correct_order(self):
+        response = self.client.get('/api/v1/catalog/es-wines/?query=Chardonnay')
+        self.assertEqual(2, len(response.data))
+        self.assertListEqual([
+            "0082f217-3300-405b-abc6-3adcbecffd67",
+            "000bbdff-30fc-4897-81c1-7947e11e6d1a",
+        ], [item['id'] for item in response.data])

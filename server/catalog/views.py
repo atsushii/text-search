@@ -37,9 +37,9 @@ class ESWinesView(APIView):
 
         if query:
             q['should'] = [
-                Match(variety=query),
-                Match(winery=query),
-                Match(description=query)
+                Match(variety={'query': query, 'boost': 3.0}),
+                Match(winery={'query': query, 'boost': 2.0}),
+                Match(description={'query': query, 'boost': 1.0})
             ]
             q['minimum_should_match'] = 1
 
